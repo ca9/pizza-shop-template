@@ -19,7 +19,7 @@
     )
   }
 
-  let selectedOrderId: string;
+  let selectedOrder: typeof data.orders[number];
   let orderStatuses: Array<{ status: string, status_notes: string, created_at: string }> = [];
   let error: string | null = null;
 
@@ -27,18 +27,18 @@
   onMount(() => {
     let orders = data.orders;
     if (orders.length > 0) {
-      selectedOrderId = orders[0].id;
-      fetchStatus(selectedOrderId);
+      selectedOrder = orders[0];
+      fetchStatus(selectedOrder.id);
       // console.log(selectedOrderId);
     }
   });
 
   // Ensure correct typing for the orderId parameter
-  function selectOrder(orderId: string) {
+  function selectOrder(order: typeof data.orders[number]) {
     // console.log("Clicked Select Order for : " + orderId);
-    selectedOrderId = orderId;
+    selectedOrder = order;
     error = null;
-    fetchStatus(orderId);
+    fetchStatus(order.id);
   }
 
   const statusOrder = ['Order received', 'Order Accepted', 'Cooking', 'On its way!', 'Order Complete'];
@@ -69,6 +69,15 @@
       error = 'Error fetching order status';
       console.error(err);
     }
+  }
+
+  function legibleDate(dateString: string) {
+    return new Date(dateString)
+            .toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function legibleTime(dateString: string) {
+    return new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
   }
 
 </script>
@@ -124,7 +133,10 @@
   <!-- Order Status Section -->
   {#if orderStatuses.length > 0}
     <h1 class="text-2xl font-bold">Order Status</h1>
-    <!-- p>Order: {selectedOrderId} </p-->
+    <div class="text-center">Order for <strong>{selectedOrder.pizza_size?.size.toLowerCase()} pizza </strong> at <br />
+      { legibleTime(selectedOrder.created_at) }, on { legibleDate(selectedOrder.created_at) }
+      <br /><p class="text-gray-500 text-xs"> Order ID: {selectedOrder.id} </p>
+    </div>
     <div class="status-flow flex sm:flex-row flex-col items-center justify-between w-full">
       {#each statusOrder as status, index}
         {@const isCurrentStatus = index === orderStatuses.length - 1 }
@@ -172,16 +184,16 @@
                 class="order-panel-box"
                 role="button"
                 tabindex="0"
-                on:keydown={(event) => event.key === 'Enter' && selectOrder(order.id)}
-                class:selected={order.id === selectedOrderId}
-                on:click={() => selectOrder(order.id)}
+                on:keydown={(event) => event.key === 'Enter' && selectOrder(order)}
+                class:selected={order.id === selectedOrder?.id}
+                on:click={() => selectOrder(order)}
         >
           <div class="flex flex-row items-center justify-between">
             <h2 class="text-xl font-bold">
-            {new Date(order.created_at).toLocaleDateString()}
+              { legibleDate(order.created_at) }
             </h2>
             <h3 class="font-bold text-right">
-              {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
+              { legibleTime(order.created_at) }
             </h3>
           </div>
           <hr class="my-4 border-gray-300">
