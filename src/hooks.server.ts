@@ -1,11 +1,11 @@
-import { createServerClient } from '@supabase/ssr'
+import {createServerClient} from '@supabase/ssr'
 import { type Handle, redirect } from '@sveltejs/kit'
 import { sequence } from '@sveltejs/kit/hooks'
 import type { RequestEvent } from '@sveltejs/kit'
 
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public'
 import { PRIVATE_SUPABASE_SERVICE_ROLE_KEY } from '$env/static/private'
-import type { SupabaseClient } from '@supabase/supabase-js'
+import { type SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '$lib/database'
 
 function createSupabaseClient(

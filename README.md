@@ -74,6 +74,23 @@ pnpm install
 Start the Supabase database with `pnpm db:start`. This may take a while to start the
 first time around as Supabase is comprised a number of services.
 
+#### 4. Make a .env file using .env.sample
+
+Run
+
+```bash
+supabase status
+```
+
+Find the appropriate values for 
+```
+PUBLIC_SUPABASE_URL=""
+PUBLIC_SUPABASE_ANON_KEY=""
+PRIVATE_SUPABASE_SERVICE_ROLE_KEY=""
+```
+and add them to a `.env` file. Note that a local docker deployment of supabase does not provide API settings on the dashboard.
+The CLI command `supabase status` is the recommended way to fetch this once setup.
+
 ### Running the app
 
 Once you've installed the dependencies, you can run the app with `pnpm dev`.
