@@ -1,45 +1,47 @@
 import { createClient } from '@supabase/supabase-js';
-import {advanceOrders, getAdvanceableOrdersByEmail, getAdvanceableOrders} from '$lib/utils/orderStatusUtils';
+import { advanceOrders, getAdvanceableOrdersByEmail, getAdvanceableOrders } from '$lib/utils/orderStatusUtils';
 import dotenv from 'dotenv';
+import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
 
 // console.log('Current working directory:', process.cwd());
 dotenv.config({ path: ".env" });
 
 const supabaseUrl = process.env.PUBLIC_SUPABASE_URL!;
 const supabaseAdminKey = process.env.PRIVATE_SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseAdminClient = createClient(supabaseUrl, supabaseAdminKey);
+
+interface Args {
+    email?: string;
+    orderId?: string;
+    all: boolean;
+}
+
+const args = yargs(hideBin(process.argv))
+    .option('email', { type: 'string', describe: 'Advance orders for the given email', demandOption: false })
+    .option('orderId', { type: 'string', describe: 'Advance a specific order by ID', demandOption: false })
+    .option('all', { type: 'boolean', describe: 'Advance all possible orders', default: false })
+    .help().parseSync() as Args;
 
 async function runCLI() {
-    const supabaseAdminClient = createClient(supabaseUrl, supabaseAdminKey);
-    const args = process.argv.slice(2);
-
-    // Helper to get argument value by flag (e.g. --order or --user)
-    const getArgValue = (flag: string) => {
-        const index = args.indexOf(flag);
-        return index !== -1 && args[index + 1] ? args[index + 1] : null;
-    };
-
-    // Fetch arguments
-    const orderId = getArgValue('--order');
-    const userEmail = getArgValue('--email');
-    const allPossible = args.includes('--all=true');
-    // todo: add order notes as a param
+    const { email, orderId, all } = args;
 
     try {
         let orderIds: string[];
-        if (!userEmail) {
+        if (!email) {
             if (orderId) {
                 // If specific orderId is provided, advance that specific order
                 orderIds = [orderId];
             } else {
                 // Fetch advancable orders for the client
-                orderIds = await getAdvanceableOrders(supabaseAdminClient, allPossible);
+                orderIds = await getAdvanceableOrders(supabaseAdminClient, all);
                 if (!orderIds.length) {
                     console.log('No orders to advance.');
                     return;
                 }
             }
         } else {
-            orderIds = await getAdvanceableOrdersByEmail(supabaseAdminClient, userEmail, allPossible);
+            orderIds = await getAdvanceableOrdersByEmail(supabaseAdminClient, email, all);
         }
         // Advance the orders
         const results = await advanceOrders(supabaseAdminClient, orderIds);

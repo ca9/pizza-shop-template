@@ -22,3 +22,7 @@ vite.config.ts.timestamp-*
 
 # test results
 test-results
+last-run.json
+
+# local cronjobs
+cronJobs.json

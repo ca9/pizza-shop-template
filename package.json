@@ -18,9 +18,12 @@
     "db:typegen": "supabase gen types typescript --local > ./src/lib/database.ts",
     "db:seed": "supabase db seed",
     "advance:latest": "tsx src/lib/utils/cli/advanceOrdersCLI.ts",
-    "advance:all": "tsx src/lib/utils/cli/advanceOrdersCLI.ts --all=true",
+    "advance:all": "tsx src/lib/utils/cli/advanceOrdersCLI.ts --all=advtrue",
     "advance:user": "tsx src/lib/utils/cli/advanceOrdersCLI.ts --email",
-    "advance:order": "tsx src/lib/utils/cli/advanceOrdersCLI.ts --order"
+    "advance:order": "tsx src/lib/utils/cli/advanceOrdersCLI.ts --order",
+    "advance_cron:start": "tsx src/lib/utils/cli/advanceOrdersCron.ts start",
+    "advance_cron:start-all": "tsx src/lib/utils/cli/advanceOrdersCron.ts start --allPossible=true",
+    "advance_cron:stop": "tsx src/lib/utils/cli/advanceOrdersCron.ts stop"
   },
   "devDependencies": {
     "@playwright/test": "^1.28.1",
@@ -30,12 +33,15 @@
     "@tailwindcss/typography": "^0.5.14",
     "@types/eslint": "^9.6.0",
     "@types/node": "^20.16.9",
+    "@types/node-cron": "^3.0.11",
+    "@types/yargs": "^17.0.33",
     "autoprefixer": "^10.4.20",
     "dotenv-cli": "^7.4.2",
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-svelte": "^2.36.0",
     "globals": "^15.0.0",
+    "node-cron": "^3.0.3",
     "prettier": "^3.1.1",
     "prettier-plugin-svelte": "^3.1.2",
     "prettier-plugin-tailwindcss": "^0.6.5",
@@ -58,6 +64,7 @@
     "dotenv": "^16.4.5",
     "sveltekit-superforms": "^2.17.0",
     "tailwind-merge": "^2.5.2",
+    "yargs": "^17.7.2",
     "zod": "^3.23.8"
   }
 }
