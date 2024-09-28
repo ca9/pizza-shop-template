@@ -20,8 +20,13 @@
   }
 
   let selectedOrder: typeof data.orders[number];
-  let orderStatuses: Array<{ status: string, status_notes: string, created_at: string }> = [];
+  let orderStatuses: Array<{ status: string, status_notes: string, created_at: string, readable_status: string }> = [];
   let error: string | null = null;
+
+  // fetchTimeoutForResourcePreservation
+  let fetchCount = 0;  // Track the number of fetches
+  let maxFetchCount = 100;  // Set the maximum fetch count per refresh
+  let showRefreshMessage = false;
 
   // Select the topmost order on mount
   onMount(() => {
@@ -29,8 +34,18 @@
     if (orders.length > 0) {
       selectedOrder = orders[0];
       fetchStatus(selectedOrder.id);
-      // console.log(selectedOrderId);
     }
+
+    // Set up the interval to fetch the status periodically
+    const refreshIntervalObj = setInterval(() => {
+      if (fetchCount <= maxFetchCount) {
+        fetchCount++;
+        fetchStatus(selectedOrder.id);
+      } else {
+        showRefreshMessage = true;
+        clearInterval(refreshIntervalObj);
+      }
+    }, 30000); // 30 seconds = 30000 ms
   });
 
   // Ensure correct typing for the orderId parameter
@@ -52,6 +67,7 @@
 
   // Fetch order status dynamically via POST
   async function fetchStatus(orderId: string) {
+    console.log("to fetch: " + orderId);
     try {
       const response = await fetch('/api/order-status', {
         method: 'POST',
@@ -61,7 +77,8 @@
 
       if (response.ok) {
         const result = await response.json();
-        orderStatuses = result.statuses;
+        orderStatuses = result;
+        console.log(orderStatuses);
       } else {
         error = 'Failed to fetch order status';
       }
@@ -111,12 +128,17 @@
   }
 
   .current-selected {
-    padding: 16px; /* Equivalent to Tailwind's p-4 */
-    margin: 8px; /* Add margin for spacing */
-    border-radius: 8px; /* Equivalent to Tailwind's rounded-lg */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.1); /* Equivalent to shadow-lg */
-    border: 4px solid #7e22ce; /* Equivalent to Tailwind's ring-4 ring-purple-500 */
-    background-color: white; /* Equivalent to Tailwind's bg-white */
+    padding: 16px;
+    margin: 8px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.1);
+    border: 4px solid #7e22ce;
+    background-color: white;
+  }
+
+  .refresh-message {
+    color: red;
+    text-align: center;
   }
 </style>
 
@@ -131,8 +153,14 @@
   {/if}
 
   <!-- Order Status Section -->
-  {#if orderStatuses.length > 0}
+  {#if orderStatuses?.length > 0}
     <h1 class="text-2xl font-bold">Order Status</h1>
+    {#if showRefreshMessage}
+      <div class="refresh-message text-center">
+        <b>Note: </b> Auto-refresh for order-status stopped to save your device's resources! <br />
+        Please refresh the page to resume auto-updates to your order status.
+      </div>
+    {/if}
     <div class="text-center">Order for <strong>{selectedOrder.pizza_size?.size.toLowerCase()} pizza </strong> at <br />
       { legibleTime(selectedOrder.created_at) }, on { legibleDate(selectedOrder.created_at) }
       <br /><p class="text-gray-500 text-xs"> Order ID: {selectedOrder.id} </p>
@@ -158,15 +186,17 @@
 
           <!-- Show status_notes by default for the last status, toggle on click for others -->
           {#if isCurrentStatus}
-            <p class="text-sm text-gray-600 mt-2">
-              {orderStatuses[index].status_notes}
+            <p class="text-sm text-gray-600 mt-2 text-center">
+              {orderStatuses[index].readable_status}
+              {#if orderStatuses[index].status_notes} <br /> {orderStatuses[index].status_notes} {/if}
             </p>
           {/if}
         </div>
 
         <!-- Dotted line logic -->
         {#if index < statusOrder.length - 1}
-          <div class="progress-line flex-1 h-1 mx-2 border-t-2 border-dotted border-gray-400" class:bg-green-500={index < orderStatuses.length - 1}></div>
+          <div class="progress-line flex-1 h-1 mx-2 border-t-2 border-dotted border-gray-400"
+               class:bg-green-500={index < orderStatuses.length - 1}></div>
         {/if}
       {/each}
     </div>
