@@ -7,7 +7,6 @@ dotenv.config({ path: ".env" });
 
 const supabaseUrl = process.env.PUBLIC_SUPABASE_URL!;
 const supabaseAdminKey = process.env.PRIVATE_SUPABASE_SERVICE_ROLE_KEY!;
-// const supabaseAnonKey = process.env.SUPABASE_ANON_KEY!;
 
 async function runCLI() {
     const supabaseAdminClient = createClient(supabaseUrl, supabaseAdminKey);
@@ -23,6 +22,7 @@ async function runCLI() {
     const orderId = getArgValue('--order');
     const userEmail = getArgValue('--email');
     const allPossible = args.includes('--all=true');
+    // todo: add order notes as a param
 
     try {
         let orderIds: string[];

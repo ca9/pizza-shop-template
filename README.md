@@ -100,6 +100,22 @@ You can preview the production build with `pnpm preview`.
 Both will automatically read the environment variables from the `.env` file using
 `dotenv-cli`.
 
+### Advancing Orders
+
+Look through the commands to advance order to their "next" status via CLI. The commands are admin priveleged.
+
+```bash
+# advance the latest order to next status/stage
+pnpm advance:latest
+# advance all orders to next status/stage
+pnpm advance:all
+# advance latest order(s) (using --all) for given user to next status/stage 
+pnpm advance:user --email <user-email>
+pnpm advance:user --email <user-email> --all
+# advance specific order id 
+pnpm advance:order --order <order-id>
+```
+
 ### Database management
 
 Add a database migration with `pnpm db:migrate <migration_name>`. This will create a new
